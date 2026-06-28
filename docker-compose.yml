@@ -1,0 +1,118 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: observation
+      POSTGRES_USER: observation
+      POSTGRES_PASSWORD: observation
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  ingestion:
+    build:
+      context: .
+      dockerfile: src/IngestionService/Dockerfile
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__ObservationDatabase: Host=postgres;Port=5432;Database=observation;Username=observation;Password=observation
+    depends_on:
+      - postgres
+
+  consensus:
+    build:
+      context: .
+      dockerfile: src/ConsensusService/Dockerfile
+    environment:
+      ConnectionStrings__ObservationDatabase: Host=postgres;Port=5432;Database=observation;Username=observation;Password=observation
+    depends_on:
+      - postgres
+
+  notification:
+    build:
+      context: .
+      dockerfile: src/NotificationService/Dockerfile
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+    depends_on:
+      - postgres
+
+  reporting:
+    build:
+      context: .
+      dockerfile: src/ReportingService/Dockerfile
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__ObservationDatabase: Host=postgres;Port=5432;Database=observation;Username=observation;Password=observation
+    depends_on:
+      - postgres
+
+  ingress:
+    build:
+      context: .
+      dockerfile: src/Ingress/Dockerfile
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      Routes__IngestionService: http://ingestion:8080
+      Routes__NotificationService: http://notification:8080
+      Routes__ReportingService: http://reporting:8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      - ingestion
+      - notification
+      - reporting
+
+  sensor-1:
+    build:
+      context: .
+      dockerfile: src/SensorClient/Dockerfile
+    environment:
+      SENSOR_ID: sensor-1
+      SERVER_URL: http://ingress:8080
+    depends_on:
+      - ingress
+
+  sensor-2:
+    build:
+      context: .
+      dockerfile: src/SensorClient/Dockerfile
+    environment:
+      SENSOR_ID: sensor-2
+      SERVER_URL: http://ingress:8080
+    depends_on:
+      - ingress
+
+  sensor-3:
+    build:
+      context: .
+      dockerfile: src/SensorClient/Dockerfile
+    environment:
+      SENSOR_ID: sensor-3
+      SERVER_URL: http://ingress:8080
+    depends_on:
+      - ingress
+
+  sensor-4:
+    build:
+      context: .
+      dockerfile: src/SensorClient/Dockerfile
+    environment:
+      SENSOR_ID: sensor-4
+      SERVER_URL: http://ingress:8080
+    depends_on:
+      - ingress
+
+  sensor-5:
+    build:
+      context: .
+      dockerfile: src/SensorClient/Dockerfile
+    environment:
+      SENSOR_ID: sensor-5
+      SERVER_URL: http://ingress:8080
+    depends_on:
+      - ingress
+
+volumes:
+  postgres-data:

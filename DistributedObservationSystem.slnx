@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ConsensusService/ConsensusService.csproj" />
+    <Project Path="src/DistributedObservationSystem.Common/DistributedObservationSystem.Common.csproj" />
+    <Project Path="src/DistributedObservationSystem.Contracts/DistributedObservationSystem.Contracts.csproj" />
+    <Project Path="src/DistributedObservationSystem.Persistence/DistributedObservationSystem.Persistence.csproj" />
+    <Project Path="src/DistributedObservationSystem.Security/DistributedObservationSystem.Security.csproj" />
+    <Project Path="src/IngestionService/IngestionService.csproj" />
+    <Project Path="src/Ingress/Ingress.csproj" />
+    <Project Path="src/NotificationService/NotificationService.csproj" />
+    <Project Path="src/ReportingService/ReportingService.csproj" />
+    <Project Path="src/SensorClient/SensorClient.csproj" />
+  </Folder>
+</Solution>
