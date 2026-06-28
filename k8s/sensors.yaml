@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensor-clients
+  namespace: snus
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: sensor-client
+  template:
+    metadata:
+      labels:
+        app: sensor-client
+    spec:
+      containers:
+        - name: sensor-client
+          image: snus-sensor-client:local
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: SERVER_URL
+              value: http://ingress:8080
+            - name: SENSOR_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name

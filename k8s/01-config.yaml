@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: snus-config
+  namespace: snus
+data:
+  ASPNETCORE_URLS: http://+:8080
+  Routes__IngestionService: http://ingestion:8080
+  Routes__NotificationService: http://notification:8080
+  Routes__ReportingService: http://reporting:8080
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: snus-secrets
+  namespace: snus
+type: Opaque
+stringData:
+  POSTGRES_DB: observation
+  POSTGRES_USER: observation
+  POSTGRES_PASSWORD: observation
+  ConnectionStrings__ObservationDatabase: Host=postgres;Port=5432;Database=observation;Username=observation;Password=observation
