@@ -1,0 +1,38 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: snus-ingress
+  namespace: snus
+spec:
+  rules:
+    - host: snus.local
+      http:
+        paths:
+          - path: /api/ingest
+            pathType: Prefix
+            backend:
+              service:
+                name: ingress
+                port:
+                  number: 8080
+          - path: /api/reports
+            pathType: Prefix
+            backend:
+              service:
+                name: ingress
+                port:
+                  number: 8080
+          - path: /api/notifications
+            pathType: Prefix
+            backend:
+              service:
+                name: ingress
+                port:
+                  number: 8080
+          - path: /hubs/alarms
+            pathType: Prefix
+            backend:
+              service:
+                name: ingress
+                port:
+                  number: 8080

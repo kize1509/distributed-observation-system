@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-ConsensusService-f6890027-46f8-4ad6-94cb-9d8fdffb609f</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DistributedObservationSystem.Contracts\DistributedObservationSystem.Contracts.csproj" />
+    <ProjectReference Include="..\DistributedObservationSystem.Persistence\DistributedObservationSystem.Persistence.csproj" />
+    <ProjectReference Include="..\DistributedObservationSystem.Common\DistributedObservationSystem.Common.csproj" />
+  </ItemGroup>
+</Project>
