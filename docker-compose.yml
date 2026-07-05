@@ -9,6 +9,22 @@ services:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U observation -d observation"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrator:
+    build:
+      context: .
+      dockerfile: src/Migrator/Dockerfile
+    environment:
+      ConnectionStrings__ObservationDatabase: Host=postgres;Port=5432;Database=observation;Username=observation;Password=observation
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
 
   ingestion:
     build:
@@ -18,7 +34,8 @@ services:
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__ObservationDatabase: Host=postgres;Port=5432;Database=observation;Username=observation;Password=observation
     depends_on:
-      - postgres
+      migrator:
+        condition: service_completed_successfully
 
   consensus:
     build:
@@ -27,7 +44,8 @@ services:
     environment:
       ConnectionStrings__ObservationDatabase: Host=postgres;Port=5432;Database=observation;Username=observation;Password=observation
     depends_on:
-      - postgres
+      migrator:
+        condition: service_completed_successfully
 
   notification:
     build:
@@ -46,7 +64,8 @@ services:
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__ObservationDatabase: Host=postgres;Port=5432;Database=observation;Username=observation;Password=observation
     depends_on:
-      - postgres
+      migrator:
+        condition: service_completed_successfully
 
   ingress:
     build:

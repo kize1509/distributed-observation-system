@@ -6,3 +6,4 @@ obj/
 **/obj/
 .dotnet/
 .nuget/
+docs/
