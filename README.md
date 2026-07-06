@@ -16,6 +16,28 @@
    docker compose down
    ```
 
+## Two-Machine Run
+
+The backend runs on one machine and the sensor clients on another, communicating over
+a concrete network address (not `localhost`), as required by the project.
+
+1. On **Machine A (server)**, find its LAN IP (e.g. `192.168.1.50`) and start the backend:
+   ```bash
+   docker compose -f docker-compose.server.yml up --build
+   ```
+   Only Ingress (`8080`) is exposed on the network; Postgres is bound to `127.0.0.1`.
+   Ensure the host firewall allows inbound TCP `8080`.
+
+2. On **Machine B (clients)**, point the sensors at Machine A and start them:
+   ```bash
+   SERVER_URL=http://192.168.1.50:8080 docker compose -f docker-compose.clients.yml up --build
+   ```
+
+3. Verify from Machine B that the server is reachable:
+   ```bash
+   curl http://192.168.1.50:8080/healthz
+   ```
+
 ## Local Build
 
 1. Restore and build:

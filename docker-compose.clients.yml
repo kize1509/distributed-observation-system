@@ -1,0 +1,40 @@
+services:
+  sensor-1:
+    build:
+      context: .
+      dockerfile: src/SensorClient/Dockerfile
+    environment:
+      SENSOR_ID: sensor-1
+      SERVER_URL: ${SERVER_URL:-http://ingress:8080}
+
+  sensor-2:
+    build:
+      context: .
+      dockerfile: src/SensorClient/Dockerfile
+    environment:
+      SENSOR_ID: sensor-2
+      SERVER_URL: ${SERVER_URL:-http://ingress:8080}
+
+  sensor-3:
+    build:
+      context: .
+      dockerfile: src/SensorClient/Dockerfile
+    environment:
+      SENSOR_ID: sensor-3
+      SERVER_URL: ${SERVER_URL:-http://ingress:8080}
+
+  sensor-4:
+    build:
+      context: .
+      dockerfile: src/SensorClient/Dockerfile
+    environment:
+      SENSOR_ID: sensor-4
+      SERVER_URL: ${SERVER_URL:-http://ingress:8080}
+
+  sensor-5:
+    build:
+      context: .
+      dockerfile: src/SensorClient/Dockerfile
+    environment:
+      SENSOR_ID: sensor-5
+      SERVER_URL: ${SERVER_URL:-http://ingress:8080}

@@ -1,0 +1,88 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: observation
+      POSTGRES_USER: observation
+      POSTGRES_PASSWORD: observation
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U observation -d observation"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrator:
+    build:
+      context: .
+      dockerfile: src/Migrator/Dockerfile
+    environment:
+      ConnectionStrings__ObservationDatabase: Host=postgres;Port=5432;Database=observation;Username=observation;Password=observation
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  ingestion:
+    build:
+      context: .
+      dockerfile: src/IngestionService/Dockerfile
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__ObservationDatabase: Host=postgres;Port=5432;Database=observation;Username=observation;Password=observation
+    depends_on:
+      migrator:
+        condition: service_completed_successfully
+
+  consensus:
+    build:
+      context: .
+      dockerfile: src/ConsensusService/Dockerfile
+    environment:
+      ConnectionStrings__ObservationDatabase: Host=postgres;Port=5432;Database=observation;Username=observation;Password=observation
+    depends_on:
+      migrator:
+        condition: service_completed_successfully
+
+  notification:
+    build:
+      context: .
+      dockerfile: src/NotificationService/Dockerfile
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+    depends_on:
+      migrator:
+        condition: service_completed_successfully
+
+  reporting:
+    build:
+      context: .
+      dockerfile: src/ReportingService/Dockerfile
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__ObservationDatabase: Host=postgres;Port=5432;Database=observation;Username=observation;Password=observation
+    depends_on:
+      migrator:
+        condition: service_completed_successfully
+
+  ingress:
+    build:
+      context: .
+      dockerfile: src/Ingress/Dockerfile
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      Routes__IngestionService: http://ingestion:8080
+      Routes__NotificationService: http://notification:8080
+      Routes__ReportingService: http://reporting:8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      - ingestion
+      - notification
+      - reporting
+
+volumes:
+  postgres-data:
