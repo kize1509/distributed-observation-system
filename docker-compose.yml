@@ -43,6 +43,8 @@ services:
       dockerfile: src/ConsensusService/Dockerfile
     environment:
       ConnectionStrings__ObservationDatabase: Host=postgres;Port=5432;Database=observation;Username=observation;Password=observation
+      Consensus__MadMultiplier: "3.0"
+      Consensus__ConsecutiveRejectionsThreshold: "3"
     depends_on:
       migrator:
         condition: service_completed_successfully
