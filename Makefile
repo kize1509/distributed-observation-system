@@ -1,6 +1,8 @@
-.PHONY: up down up-server up-clients up-minikube down-minikube dashboard redeploy db-forward db-clear
+.PHONY: up down up-server up-clients up-minikube down-minikube dashboard redeploy db-forward db-clear block-sensor
 
 SERVER_URL ?= http://localhost:8080
+API_URL    ?= http://localhost:8080
+SENSOR_ID  ?= sensor-1
 
 up:
 	docker compose up --build
@@ -44,6 +46,9 @@ redeploy:
 
 db-forward:
 	kubectl port-forward svc/postgres 5432:5432 -n snus
+
+block-sensor:
+	curl -s -X POST $(API_URL)/api/ingest/sensors/$(SENSOR_ID)/block | cat
 
 db-clear:
 	kubectl exec -n snus deployment/postgres -- psql -U observation -d observation \

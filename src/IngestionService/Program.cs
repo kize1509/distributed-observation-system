@@ -17,12 +17,31 @@ builder.Services.AddHttpClient("notification", client =>
     client.BaseAddress = new Uri(
         builder.Configuration["Routes__NotificationService"] ?? "http://notification:8080");
 });
+builder.Services.AddHostedService<IngestionService.InactivitySweeper>();
 
 var app = builder.Build();
 
 var notificationClient = app.Services.GetRequiredService<IHttpClientFactory>().CreateClient("notification");
 
 app.MapGet("/healthz", () => Results.Ok(new { service = "IngestionService", status = "healthy" }));
+
+app.MapPost("/api/ingest/sensors/{id}/block", async ( // For demonstrational purposes
+    string id,
+    ObservationDbContext db,
+    ILoggerFactory loggerFactory) =>
+{
+    var logger = loggerFactory.CreateLogger("IngestionService.Block");
+
+    var sensor = await db.Sensors.FindAsync(id);
+    if (sensor is null)
+        return Results.NotFound($"Sensor '{id}' not found.");
+
+    sensor.BlockedUntilUtc = DateTimeOffset.UtcNow.AddSeconds(30);
+    await db.SaveChangesAsync();
+
+    logger.LogWarning("Sensor {SensorId} manually blocked for 30s", id);
+    return Results.Ok(new { sensorId = id, blockedUntil = sensor.BlockedUntilUtc });
+});
 
 app.MapPost("/api/ingest/connect", (
     ConnectRequest request,
