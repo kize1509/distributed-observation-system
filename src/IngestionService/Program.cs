@@ -12,8 +12,15 @@ builder.Services.AddObservationDatabase(builder.Configuration);
 builder.Services.AddSingleton<RsaHandshakeService>();
 builder.Services.AddSingleton<AesGcmService>();
 builder.Services.AddSingleton<HandshakeStore>();
+builder.Services.AddHttpClient("notification", client =>
+{
+    client.BaseAddress = new Uri(
+        builder.Configuration["Routes__NotificationService"] ?? "http://notification:8080");
+});
 
 var app = builder.Build();
+
+var notificationClient = app.Services.GetRequiredService<IHttpClientFactory>().CreateClient("notification");
 
 app.MapGet("/healthz", () => Results.Ok(new { service = "IngestionService", status = "healthy" }));
 
@@ -151,6 +158,22 @@ app.MapPost("/api/ingest/readings", async (
     logger.LogInformation(
         "Decrypted reading from sensor {SensorId}: {Value} at {MeasuredAtUtc}",
         envelope.SensorId, reading.Value, reading.MeasuredAtUtc);
+
+    if (reading.AlarmPriority > 0)
+    {
+        Console.ForegroundColor = reading.AlarmPriority switch
+        {
+            1 => ConsoleColor.Yellow,
+            2 => ConsoleColor.DarkYellow,
+            3 => ConsoleColor.Red,
+            _ => ConsoleColor.Gray
+        };
+        Console.WriteLine($"[ALARM P{reading.AlarmPriority}] Sensor={envelope.SensorId} Value={reading.Value:F2}");
+        Console.ResetColor();
+
+        _ = notificationClient.PostAsJsonAsync("/api/notifications/alarms",
+            new AlarmNotificationRequest(envelope.SensorId, reading.Value, reading.AlarmPriority, reading.MeasuredAtUtc));
+    }
 
     return Results.Accepted();
 });

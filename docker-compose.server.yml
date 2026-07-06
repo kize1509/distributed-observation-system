@@ -33,6 +33,7 @@ services:
     environment:
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__ObservationDatabase: Host=postgres;Port=5432;Database=observation;Username=observation;Password=observation
+      Routes__NotificationService: http://notification:8080
     depends_on:
       migrator:
         condition: service_completed_successfully

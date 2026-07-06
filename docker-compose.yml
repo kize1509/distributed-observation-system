@@ -33,6 +33,7 @@ services:
     environment:
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__ObservationDatabase: Host=postgres;Port=5432;Database=observation;Username=observation;Password=observation
+      Routes__NotificationService: http://notification:8080
     depends_on:
       migrator:
         condition: service_completed_successfully
@@ -92,6 +93,10 @@ services:
     environment:
       SENSOR_ID: sensor-1
       SERVER_URL: http://ingress:8080
+      DATA_QUALITY: Good
+      THRESHOLD_P1: "80"
+      THRESHOLD_P2: "100"
+      THRESHOLD_P3: "110"
     depends_on:
       - ingress
 
@@ -102,6 +107,10 @@ services:
     environment:
       SENSOR_ID: sensor-2
       SERVER_URL: http://ingress:8080
+      DATA_QUALITY: Good
+      THRESHOLD_P1: "80"
+      THRESHOLD_P2: "100"
+      THRESHOLD_P3: "110"
     depends_on:
       - ingress
 
@@ -112,6 +121,10 @@ services:
     environment:
       SENSOR_ID: sensor-3
       SERVER_URL: http://ingress:8080
+      DATA_QUALITY: Good
+      THRESHOLD_P1: "80"
+      THRESHOLD_P2: "100"
+      THRESHOLD_P3: "110"
     depends_on:
       - ingress
 
@@ -122,6 +135,10 @@ services:
     environment:
       SENSOR_ID: sensor-4
       SERVER_URL: http://ingress:8080
+      DATA_QUALITY: Good
+      THRESHOLD_P1: "80"
+      THRESHOLD_P2: "100"
+      THRESHOLD_P3: "110"
     depends_on:
       - ingress
 
@@ -132,6 +149,10 @@ services:
     environment:
       SENSOR_ID: sensor-5
       SERVER_URL: http://ingress:8080
+      DATA_QUALITY: Good
+      THRESHOLD_P1: "80"
+      THRESHOLD_P2: "100"
+      THRESHOLD_P3: "110"
     depends_on:
       - ingress
 

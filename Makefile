@@ -1,4 +1,4 @@
-.PHONY: up down up-server up-clients up-minikube down-minikube dashboard redeploy db-forward
+.PHONY: up down up-server up-clients up-minikube down-minikube dashboard redeploy db-forward db-clear
 
 SERVER_URL ?= http://localhost:8080
 
@@ -44,6 +44,10 @@ redeploy:
 
 db-forward:
 	kubectl port-forward svc/postgres 5432:5432 -n snus
+
+db-clear:
+	kubectl exec -n snus deployment/postgres -- psql -U observation -d observation \
+		-c "TRUNCATE \"SensorReadings\", \"ConsensusReadings\", \"AlarmEvents\", \"Sensors\" RESTART IDENTITY CASCADE;"
 
 dashboard:
 	minikube dashboard

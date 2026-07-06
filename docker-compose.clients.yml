@@ -6,6 +6,10 @@ services:
     environment:
       SENSOR_ID: sensor-1
       SERVER_URL: ${SERVER_URL:-http://ingress:8080}
+      DATA_QUALITY: Good
+      THRESHOLD_P1: "80"
+      THRESHOLD_P2: "100"
+      THRESHOLD_P3: "110"
 
   sensor-2:
     build:
@@ -14,6 +18,10 @@ services:
     environment:
       SENSOR_ID: sensor-2
       SERVER_URL: ${SERVER_URL:-http://ingress:8080}
+      DATA_QUALITY: Good
+      THRESHOLD_P1: "80"
+      THRESHOLD_P2: "100"
+      THRESHOLD_P3: "110"
 
   sensor-3:
     build:
@@ -22,6 +30,10 @@ services:
     environment:
       SENSOR_ID: sensor-3
       SERVER_URL: ${SERVER_URL:-http://ingress:8080}
+      DATA_QUALITY: Good
+      THRESHOLD_P1: "80"
+      THRESHOLD_P2: "100"
+      THRESHOLD_P3: "110"
 
   sensor-4:
     build:
@@ -30,6 +42,10 @@ services:
     environment:
       SENSOR_ID: sensor-4
       SERVER_URL: ${SERVER_URL:-http://ingress:8080}
+      DATA_QUALITY: Good
+      THRESHOLD_P1: "80"
+      THRESHOLD_P2: "100"
+      THRESHOLD_P3: "110"
 
   sensor-5:
     build:
@@ -38,3 +54,7 @@ services:
     environment:
       SENSOR_ID: sensor-5
       SERVER_URL: ${SERVER_URL:-http://ingress:8080}
+      DATA_QUALITY: Good
+      THRESHOLD_P1: "80"
+      THRESHOLD_P2: "100"
+      THRESHOLD_P3: "110"
