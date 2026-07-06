@@ -1,8 +1,22 @@
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient("ingestion", client =>
+    client.BaseAddress = new Uri(builder.Configuration["Routes__IngestionService"] ?? "http://ingestion:8080"));
+
+builder.Services.AddHttpClient("notification", client =>
+    client.BaseAddress = new Uri(builder.Configuration["Routes__NotificationService"] ?? "http://notification:8080"));
+
+builder.Services.AddHttpClient("reporting", client =>
+    client.BaseAddress = new Uri(builder.Configuration["Routes__ReportingService"] ?? "http://reporting:8080"));
 
 var app = builder.Build();
+
+var factory = app.Services.GetRequiredService<IHttpClientFactory>();
+var logger  = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Ingress.Proxy");
+
+var ingestion    = factory.CreateClient("ingestion");
+var notification = factory.CreateClient("notification");
+var reporting    = factory.CreateClient("reporting");
 
 app.MapGet("/healthz", () => Results.Ok(new { service = "Ingress", status = "healthy" }));
 
@@ -12,31 +26,18 @@ app.MapGet("/", () => Results.Ok(new
     routes = new[] { "/api/ingest", "/api/reports", "/api/notifications", "/hubs/alarms" }
 }));
 
-app.MapMethods("/api/ingest/{**path}", new[] { "GET", "POST", "PUT", "DELETE" }, ProxyTo("IngestionService"));
-app.MapMethods("/api/reports/{**path}", new[] { "GET", "POST", "PUT", "DELETE" }, ProxyTo("ReportingService"));
-app.MapMethods("/api/notifications/{**path}", new[] { "GET", "POST", "PUT", "DELETE" }, ProxyTo("NotificationService"));
-app.MapMethods("/hubs/alarms/{**path}", new[] { "GET", "POST", "OPTIONS" }, ProxyTo("NotificationService"));
+app.MapMethods("/api/ingest/{**path}",         new[] { "GET", "POST", "PUT", "DELETE" }, ProxyTo(ingestion));
+app.MapMethods("/api/reports/{**path}",        new[] { "GET", "POST", "PUT", "DELETE" }, ProxyTo(reporting));
+app.MapMethods("/api/notifications/{**path}",  new[] { "GET", "POST", "PUT", "DELETE" }, ProxyTo(notification));
+app.MapMethods("/hubs/alarms/{**path}",        new[] { "GET", "POST", "OPTIONS" },       ProxyTo(notification));
 
 app.Run();
 
-static RequestDelegate ProxyTo(string targetConfigKey)
-{
-    return async context =>
+RequestDelegate ProxyTo(HttpClient client) =>
+    async context =>
     {
-        var configuration = context.RequestServices.GetRequiredService<IConfiguration>();
-        var httpClientFactory = context.RequestServices.GetRequiredService<IHttpClientFactory>();
-        var logger = context.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger("Ingress.Proxy");
-        var targetBaseUrl = configuration[$"Routes:{targetConfigKey}"];
+        var targetUri = new Uri(client.BaseAddress!, context.Request.Path + context.Request.QueryString);
 
-        if (string.IsNullOrWhiteSpace(targetBaseUrl))
-        {
-            logger.LogWarning("No target configured for {TargetConfigKey}", targetConfigKey);
-            context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
-            await context.Response.WriteAsync($"No target configured for {targetConfigKey}");
-            return;
-        }
-
-        var targetUri = new Uri(new Uri(targetBaseUrl), context.Request.Path + context.Request.QueryString);
         var request = new HttpRequestMessage(new HttpMethod(context.Request.Method), targetUri)
         {
             Content = context.Request.ContentLength > 0
@@ -50,20 +51,17 @@ static RequestDelegate ProxyTo(string targetConfigKey)
             request.Content?.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray());
         }
 
-        logger.LogInformation("Proxying {Method} {Path} to {TargetUri}", context.Request.Method, context.Request.Path, targetUri);
-        using var response = await httpClientFactory.CreateClient().SendAsync(request, context.RequestAborted);
+        logger.LogInformation("Proxying {Method} {Path} → {Target}", context.Request.Method, context.Request.Path, targetUri);
+
+        using var response = await client.SendAsync(request, context.RequestAborted);
 
         context.Response.StatusCode = (int)response.StatusCode;
+
         foreach (var header in response.Headers)
-        {
             context.Response.Headers[header.Key] = header.Value.ToArray();
-        }
 
         foreach (var header in response.Content.Headers)
-        {
             context.Response.Headers[header.Key] = header.Value.ToArray();
-        }
 
         await response.Content.CopyToAsync(context.Response.Body, context.RequestAborted);
     };
-}
