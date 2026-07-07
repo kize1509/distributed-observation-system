@@ -60,20 +60,42 @@ app.MapGet("/api/reports/alarms", async (
     return Results.Ok(items);
 });
 
-app.MapGet("/api/reports/consensus", (ILoggerFactory loggerFactory) =>
+app.MapGet("/api/reports/consensus", async (
+    ObservationDbContext db,
+    DateTimeOffset? from,
+    DateTimeOffset? to,
+    int? take) =>
 {
-    loggerFactory.CreateLogger("ReportingService.Consensus")
-        .LogInformation("Received placeholder consensus report request.");
+    var query = db.ConsensusReadings.AsNoTracking().AsQueryable();
 
-    return Results.Ok(Array.Empty<object>());
+    if (from is not null)
+        query = query.Where(c => c.WindowStartUtc >= from);
+    if (to is not null)
+        query = query.Where(c => c.WindowStartUtc < to);
+
+    var items = await query
+        .OrderByDescending(c => c.WindowStartUtc)
+        .Take(ReportQuery.ClampTake(take))
+        .Select(c => new ConsensusReportItem(c.Value, c.WindowStartUtc, c.WindowEndUtc))
+        .ToListAsync();
+
+    return Results.Ok(items);
 });
 
-app.MapGet("/api/reports/sensors", (ILoggerFactory loggerFactory) =>
+app.MapGet("/api/reports/sensors", async (ObservationDbContext db) =>
 {
-    loggerFactory.CreateLogger("ReportingService.Sensors")
-        .LogInformation("Received placeholder sensor status report request.");
+    var items = await db.Sensors
+        .AsNoTracking()
+        .OrderBy(s => s.Id)
+        .Select(s => new SensorStatusReportItem(
+            s.Id,
+            s.DataQuality.ToString(),
+            s.IsActive,
+            s.LastMessageAtUtc,
+            s.BlockedUntilUtc))
+        .ToListAsync();
 
-    return Results.Ok(Array.Empty<object>());
+    return Results.Ok(items);
 });
 
 app.Run();

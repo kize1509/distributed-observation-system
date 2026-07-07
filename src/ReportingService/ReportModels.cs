@@ -21,3 +21,15 @@ public sealed record AlarmEventReportItem(
     decimal Value,
     int Priority,
     DateTimeOffset MeasuredAtUtc);
+
+public sealed record ConsensusReportItem(
+    decimal Value,
+    DateTimeOffset WindowStartUtc,
+    DateTimeOffset WindowEndUtc);
+
+public sealed record SensorStatusReportItem(
+    string SensorId,
+    string DataQuality,
+    bool IsActive,
+    DateTimeOffset? LastMessageAtUtc,
+    DateTimeOffset? BlockedUntilUtc);
