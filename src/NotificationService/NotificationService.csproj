@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DistributedObservationSystem.Contracts\DistributedObservationSystem.Contracts.csproj" />
+    <ProjectReference Include="..\DistributedObservationSystem.Persistence\DistributedObservationSystem.Persistence.csproj" />
     <ProjectReference Include="..\DistributedObservationSystem.Common\DistributedObservationSystem.Common.csproj" />
   </ItemGroup>
 
