@@ -1,6 +1,7 @@
 using DistributedObservationSystem.Contracts;
 using DistributedObservationSystem.Persistence;
 using DistributedObservationSystem.Persistence.Entities;
+using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.SignalR;
 using NotificationService;
 
@@ -42,6 +43,12 @@ app.MapPost("/api/notifications/alarms", async (
     return Results.Accepted();
 });
 
-app.MapHub<AlarmHub>("/hubs/alarms");
+// Ingress is a plain HTTP reverse proxy and cannot forward a WebSocket upgrade,
+// so the hub is restricted to Long Polling, which works over ordinary request/response.
+app.MapHub<AlarmHub>("/hubs/alarms", options =>
+{
+    options.Transports = HttpTransportType.LongPolling;
+    options.LongPolling.PollTimeout = TimeSpan.FromSeconds(15);
+});
 
 app.Run();
