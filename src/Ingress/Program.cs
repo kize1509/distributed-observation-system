@@ -26,12 +26,19 @@ app.MapGet("/", () => Results.Ok(new
     routes = new[] { "/api/ingest", "/api/reports", "/api/notifications", "/hubs/alarms" }
 }));
 
+HashSet<string> hopByHopHeaders = new(StringComparer.OrdinalIgnoreCase)
+{
+    "Transfer-Encoding", "Connection", "Keep-Alive", "TE", "Trailers", "Upgrade"
+};
+
 app.MapMethods("/api/ingest/{**path}",         new[] { "GET", "POST", "PUT", "DELETE" }, ProxyTo(ingestion));
 app.MapMethods("/api/reports/{**path}",        new[] { "GET", "POST", "PUT", "DELETE" }, ProxyTo(reporting));
 app.MapMethods("/api/notifications/{**path}",  new[] { "GET", "POST", "PUT", "DELETE" }, ProxyTo(notification));
 app.MapMethods("/hubs/alarms/{**path}",        new[] { "GET", "POST", "OPTIONS" },       ProxyTo(notification));
 
 app.Run();
+
+
 
 RequestDelegate ProxyTo(HttpClient client) =>
     async context =>
@@ -40,13 +47,14 @@ RequestDelegate ProxyTo(HttpClient client) =>
 
         var request = new HttpRequestMessage(new HttpMethod(context.Request.Method), targetUri)
         {
-            Content = context.Request.ContentLength > 0
+            Content = context.Request.ContentLength is not 0
                 ? new StreamContent(context.Request.Body)
                 : null
         };
 
         foreach (var header in context.Request.Headers)
         {
+            if (hopByHopHeaders.Contains(header.Key)) continue;
             request.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray());
             request.Content?.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray());
         }
@@ -58,10 +66,16 @@ RequestDelegate ProxyTo(HttpClient client) =>
         context.Response.StatusCode = (int)response.StatusCode;
 
         foreach (var header in response.Headers)
+        {
+            if (hopByHopHeaders.Contains(header.Key)) continue;
             context.Response.Headers[header.Key] = header.Value.ToArray();
+        }
 
         foreach (var header in response.Content.Headers)
+        {
+            if (hopByHopHeaders.Contains(header.Key)) continue;
             context.Response.Headers[header.Key] = header.Value.ToArray();
+        }
 
         await response.Content.CopyToAsync(context.Response.Body, context.RequestAborted);
     };

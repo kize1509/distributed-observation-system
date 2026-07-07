@@ -166,8 +166,7 @@ app.MapPost("/api/ingest/readings", async (
         SensorId = envelope.SensorId,
         Value = reading.Value,
         MeasuredAtUtc = reading.MeasuredAtUtc,
-        AlarmPriority = reading.AlarmPriority,
-        IsConsensus = false
+        AlarmPriority = reading.AlarmPriority
     });
 
     sensor.LastMessageId = envelope.MessageId;

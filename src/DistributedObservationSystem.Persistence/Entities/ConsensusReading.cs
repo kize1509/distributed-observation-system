@@ -10,5 +10,4 @@ public sealed class ConsensusReading
 
     public DateTimeOffset WindowEndUtc { get; set; }
 
-    public bool IsConsensus { get; set; } = true;
 }

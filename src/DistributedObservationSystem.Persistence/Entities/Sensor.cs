@@ -16,8 +16,6 @@ public sealed class Sensor
 
     public DateTimeOffset? LastMessageAtUtc { get; set; }
 
-    public string? PublicKey { get; set; }
-
     public long LastMessageId { get; set; }
 
     public DateTimeOffset? BlockedUntilUtc { get; set; }

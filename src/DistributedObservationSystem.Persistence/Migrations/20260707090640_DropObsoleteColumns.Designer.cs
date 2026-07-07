@@ -3,6 +3,7 @@ using System;
 using DistributedObservationSystem.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DistributedObservationSystem.Persistence.Migrations
 {
     [DbContext(typeof(ObservationDbContext))]
-    partial class ObservationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260707090640_DropObsoleteColumns")]
+    partial class DropObsoleteColumns
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

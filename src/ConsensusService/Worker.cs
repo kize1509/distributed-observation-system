@@ -135,8 +135,7 @@ internal sealed class Worker(
             Id = Guid.NewGuid(),
             Value = consensusValue.Value,
             WindowStartUtc = windowStart,
-            WindowEndUtc = windowEnd,
-            IsConsensus = true
+            WindowEndUtc = windowEnd
         });
 
         if (consensusReadingIds.Count > 0)

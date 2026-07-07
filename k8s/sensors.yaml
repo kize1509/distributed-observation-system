@@ -19,7 +19,7 @@ spec:
           imagePullPolicy: IfNotPresent
           env:
             - name: SERVER_URL
-              value: http://ingestion:8080
+              value: "${SERVER_URL}"
             - name: DATA_QUALITY
               value: Good
             - name: THRESHOLD_P1
