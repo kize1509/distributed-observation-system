@@ -19,7 +19,15 @@ spec:
           imagePullPolicy: IfNotPresent
           env:
             - name: SERVER_URL
-              value: http://ingress:8080
+              value: "${SERVER_URL}"
+            - name: DATA_QUALITY
+              value: Good
+            - name: THRESHOLD_P1
+              value: "80"
+            - name: THRESHOLD_P2
+              value: "100"
+            - name: THRESHOLD_P3
+              value: "110"
             - name: SENSOR_ID
               valueFrom:
                 fieldRef:

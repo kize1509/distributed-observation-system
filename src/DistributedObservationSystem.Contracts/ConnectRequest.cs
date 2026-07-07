@@ -1,6 +1,6 @@
 namespace DistributedObservationSystem.Contracts;
 
-public sealed record SensorRegistrationRequest(
+public sealed record ConnectRequest(
     string SensorId,
     decimal MinimumTemperature,
     decimal MaximumTemperature,

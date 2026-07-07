@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: migrator
+  namespace: snus
+spec:
+  backoffLimit: 20
+  template:
+    metadata:
+      labels:
+        app: migrator
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: migrator
+          image: snus-migrator:local
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - secretRef:
+                name: snus-secrets
