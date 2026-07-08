@@ -1,4 +1,4 @@
-.PHONY: up down up-server up-clients up-minikube-server up-minikube-sensors down-minikube dashboard redeploy db-forward db-clear block-sensor minikube-url
+.PHONY: up down up-server up-clients up-minikube-server up-minikube-sensors down-minikube dashboard redeploy db-forward db-clear block-sensor minikube-url monitor
 
 SERVER_URL ?=
 API_URL    ?= http://localhost:8080
@@ -88,3 +88,10 @@ db-clear:
 
 dashboard:
 	minikube dashboard
+
+# Runs the AlarmMonitor demo client locally, printing real-time alarms received
+# from NotificationService's SignalR hub through Ingress.
+#   Same machine:  make monitor
+#   Remote server: make monitor API_URL=http://<server-ip>:8080
+monitor:
+	SERVER_URL=$(API_URL) DOTNET_CLI_HOME=/tmp/codex-dotnet-home dotnet run --project src/AlarmMonitor/AlarmMonitor.csproj

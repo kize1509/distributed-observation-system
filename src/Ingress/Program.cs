@@ -34,7 +34,7 @@ HashSet<string> hopByHopHeaders = new(StringComparer.OrdinalIgnoreCase)
 app.MapMethods("/api/ingest/{**path}",         new[] { "GET", "POST", "PUT", "DELETE" }, ProxyTo(ingestion));
 app.MapMethods("/api/reports/{**path}",        new[] { "GET", "POST", "PUT", "DELETE" }, ProxyTo(reporting));
 app.MapMethods("/api/notifications/{**path}",  new[] { "GET", "POST", "PUT", "DELETE" }, ProxyTo(notification));
-app.MapMethods("/hubs/alarms/{**path}",        new[] { "GET", "POST", "OPTIONS" },       ProxyTo(notification));
+app.MapMethods("/hubs/alarms/{**path}",        new[] { "GET", "POST", "DELETE", "OPTIONS" }, ProxyTo(notification));
 
 app.Run();
 

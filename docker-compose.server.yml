@@ -56,6 +56,7 @@ services:
       dockerfile: src/NotificationService/Dockerfile
     environment:
       ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__ObservationDatabase: Host=postgres;Port=5432;Database=observation;Username=observation;Password=observation
     depends_on:
       migrator:
         condition: service_completed_successfully

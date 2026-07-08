@@ -85,6 +85,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: snus-config
+            - secretRef:
+                name: snus-secrets
 ---
 apiVersion: v1
 kind: Service

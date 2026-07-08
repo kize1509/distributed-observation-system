@@ -38,6 +38,49 @@ a concrete network address (not `localhost`), as required by the project.
    curl http://192.168.1.50:8080/healthz
    ```
 
+## Real-Time Alarm Notifications
+
+`NotificationService` records every alarm in the `AlarmEvents` table and broadcasts it live to
+subscribers over a SignalR hub at `/hubs/alarms`, proxied through Ingress.
+
+Ingress is a plain HTTP reverse proxy (it forwards ordinary request/response calls) and does not
+forward a WebSocket upgrade handshake. To keep the hub working end-to-end through Ingress without
+rewriting the proxy, both the hub and its clients are pinned to the **Long Polling** transport
+instead of WebSockets. This is slightly less efficient than a persistent WebSocket connection, but
+delivers alarms with sub-second latency, which is real-time enough for this system, and requires
+no special proxy support beyond plain HTTP.
+
+A minimal console demo client, `AlarmMonitor`, is included to observe alarms live during a
+defense/demo:
+
+```bash
+make monitor                                    # same machine, defaults to http://localhost:8080
+make monitor API_URL=http://192.168.1.50:8080   # remote server (two-machine scenario)
+```
+
+It prints each alarm colored by priority (yellow/orange/red for priority 1/2/3), matching the
+console output already used by `SensorClient` and `IngestionService`.
+
+## Historical Reports API
+
+`ReportingService` exposes read-only historical queries backed by PostgreSQL, reachable through
+Ingress under `/api/reports`. All list endpoints accept an optional `take` (default 200, max 1000)
+and, where applicable, `sensorId`, `from` and `to` (ISO-8601) query parameters.
+
+```bash
+# Historical sensor readings (optionally filtered)
+curl "http://localhost:8080/api/reports/readings?sensorId=sensor-1&take=50"
+
+# Recorded alarm events
+curl "http://localhost:8080/api/reports/alarms?from=2026-07-07T00:00:00Z"
+
+# Per-minute consensus values
+curl "http://localhost:8080/api/reports/consensus?take=10"
+
+# Current status of every sensor that has ever been part of the system
+curl "http://localhost:8080/api/reports/sensors"
+```
+
 ## Local Build
 
 1. Restore and build:

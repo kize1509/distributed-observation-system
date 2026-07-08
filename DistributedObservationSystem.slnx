@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/AlarmMonitor/AlarmMonitor.csproj" />
     <Project Path="src/ConsensusService/ConsensusService.csproj" />
     <Project Path="src/DistributedObservationSystem.Common/DistributedObservationSystem.Common.csproj" />
     <Project Path="src/DistributedObservationSystem.Contracts/DistributedObservationSystem.Contracts.csproj" />
